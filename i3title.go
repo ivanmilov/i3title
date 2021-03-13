@@ -13,19 +13,23 @@ func main() {
 	flag.Parse()
 
 	t, _ := i3.GetTree()
-	if f := t.Root.FindFocused(func(n *i3.Node) bool { return n.Type == i3.Con && len(n.Nodes) == 0 }); f != nil {
+	if f := get_focused(t.Root); f != nil {
 		print_win_title(f.WindowProperties.Title, *truncate)
 	}
 
-	recv := i3.Subscribe(i3.WindowEventType)
+	recv := i3.Subscribe(i3.WindowEventType, i3.WorkspaceEventType)
 	for recv.Next() {
-		ev := recv.Event().(*i3.WindowEvent)
-		if ev.Change != "focus" && ev.Change != "title" {
-			continue
+		switch e := recv.Event().(type) {
+		case *i3.WindowEvent:
+			title := e.Container.WindowProperties.Title
+			print_win_title(title, *truncate)
+		case *i3.WorkspaceEvent:
+			if get_focused(&e.Current) == nil {
+				if e.Change == "rename" || e.Change == "focus" {
+					print_win_title("", *truncate)
+				}
+			}
 		}
-		title := ev.Container.WindowProperties.Title
-
-		print_win_title(title, *truncate)
 	}
 }
 
@@ -36,4 +40,8 @@ func print_win_title(title string, truncate int) {
 		}
 	}
 	fmt.Printf("%s\n", title)
+}
+
+func get_focused(n *i3.Node) *i3.Node {
+	return n.FindFocused(func(n *i3.Node) bool { return n.Type == i3.Con && len(n.Nodes) == 0 })
 }
