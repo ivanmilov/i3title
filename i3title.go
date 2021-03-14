@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	"go.i3wm.org/i3/v4"
 )
@@ -36,7 +37,7 @@ func main() {
 func print_win_title(title string, truncate int) {
 	if truncate > 0 {
 		if len(title) > truncate {
-			title = fmt.Sprintf("%s...", title[:truncate])
+			title = fmt.Sprintf("%s...", strings.ToValidUTF8(title[:truncate], ""))
 		}
 	}
 	fmt.Printf("%s\n", title)
