@@ -36,8 +36,9 @@ func main() {
 
 func print_win_title(title string, truncate int) {
 	if truncate > 0 {
-		if len(title) > truncate {
-			title = fmt.Sprintf("%s...", strings.ToValidUTF8(title[:truncate], ""))
+		runes := []rune(title)
+		if len(runes) > truncate {
+			title = fmt.Sprintf("%s...", string(runes[:truncate]))
 		}
 	}
 	fmt.Printf("%s\n", title)
